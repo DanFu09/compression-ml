@@ -1,0 +1,87 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts,latexsym,amsthm,amssymb,amsmath,amscd,euscript}
+\def\arraystretch{1.2}
+
+\usepackage{bold-extra}
+\usepackage{framed}
+\usepackage{graphicx}
+\usepackage[geometry]{ifsym}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,citecolor=blue,urlcolor=black,linkbordercolor={1 0 0}}
+
+\textwidth=14.5cm \textheight=20.0cm
+\oddsidemargin=1cm
+\evensidemargin=1cm
+
+\allowdisplaybreaks[1]
+\newcommand\nc{\newcommand}
+\nc{\on}{\operatorname}
+\nc{\ol}{\overline}
+
+\title{{\textsc{CS222 Proposal: Using Compression to Speed Up Artificial Neural Networks}}}
+
+\author{Dan Fu, Gabriel Guimaraes \\
+{\small \texttt{ \{danfu,gabrielguimaraes\}@college.harvard.edu}}}
+
+\begin{document}
+
+\hypersetup{linkcolor = black}
+
+\maketitle
+
+\section{Overview}
+
+A lot of work has been done in the field of autoencoders, systems that use deep learning techniques in order to compress vectors from dimension $D$ to dimension $D' < D$. Instead of using Machine Learning to do compression, our project intends to use compression in order to aid Machine Learning. The idea is that the feature vectors that go into traditional deep learning techniques are often easily understandable by humans, but there is no such requirement in machine learning. For example, in image recognition, a common technique is to use small bitmaps as feature vectors, but nothing prevents us from compressing those bitmaps before feeding them into the neural network. If the resulting compressed vector carries the same amount of information and each of its fields has a continuous impact on the output (so we can take derivatives), everything should theoretically work with the same accuracy but improved training speed. Our project aims to test different compression techniques and compare multiple well known machine learning algorithms using compression and without compression, to validate whether this theoretical idea actually holds in practice.
+
+\section{Methodology}
+
+To analyze the DoS resilience, we intent to
+
+\begin{itemize}
+\item Simulate a regular NDN network locally (see below for possible tools);
+\item Build different types of DoS attacks (``workloads"). Examples of such attacks can be found in [2];
+\item Describe and implement strategies to avoid DoS in NDN networks [3];
+\item Evaluate the performance of the network under these workloads, using different strategies to avoid denial of service;
+\item If possible, compare the performance of CDNs under DoS with our results.
+\end{itemize}
+
+The simulations can be done with several open-source tools available, such as forks from Mininet, ndnSIM, or even using Click routers. We are currently in the process of considering which tools would best suit our needs for this project.
+
+\section{Time Schedule}
+
+The following table shows the milestones we expect to achieve in our project.
+
+\begin{center}
+\begin{tabular}{c|c}
+\textbf{Date} & \textbf{Milestone} \\
+\hline 
+October 23rd & Choice of simulation and analysis tools \\
+\hline
+November 6th & Basic simulation of NDN network \\
+\hline
+November 13th & DoS attack variations \\
+\hline
+November 27th & DoS avoidance strategies simulations \\
+\hline
+December & Analysis of results, comparisons and writeup
+\end{tabular}
+\end{center}
+
+We expect that getting the NDN simulation to work will be the most time-consuming task, since it seems that the tools for simulations are not so well-documented. Once this is done, the analysis of the performance under different attacks is a matter of generating sample workloads and gathering information from them.
+
+\section{Bibliography}
+
+[1] L. Zhang et al. Named Data Networking. \url{http://www.sigcomm.org/sites/default/files/ccr/papers/2014/July/0000000-0000010.pdf}
+
+\medskip
+
+\noindent [2] P. Gatsi, G. Tsudik, E. Uzun and L. Zhang. DoS \& DDoS in Named Data Networking. \url{http://www.ics.uci.edu/~gts/paps/ndn-dos-ICCCN13.pdf}
+
+\medskip
+
+\noindent [3] A. Afanasyev et al. Interest Flooding Attack and Countermeasures in
+Named Data Networking. http://www.ccnx.org/pubs/ifip-interest-flooding-ndn.pdf
+
+
+\end{document}
