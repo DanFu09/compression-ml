@@ -1,5 +1,7 @@
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+from jpeg import dct_truncate
+import numpy as np
 
 sess = tf.InteractiveSession()
 
@@ -27,8 +29,11 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 sess.run(tf.initialize_all_variables())
 
 # Train
-mutate = lambda x: x + 0.1
+dct_truncate_D = lambda x: dct_truncate(x, D)
+mutate = lambda X: np.apply_along_axis(dct_truncate_D, 1, X)
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+print "Hello", mutate(mnist.test.images).shape
+
 for i in xrange(1000):
     if i % 10 == 0:
         print accuracy.eval({X: mutate(mnist.test.images), Y_: mnist.test.labels})

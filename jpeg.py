@@ -1,5 +1,6 @@
 from scipy import fftpack
 import numpy as np
+from ml_util import ml
 
 
 dct = lambda x: fftpack.dct(x, norm='ortho')
@@ -14,14 +15,28 @@ def jpeg_compress(X, Q):
 
     return quantized
 
-def truncate(x, n):
-    if n >= x.shape[0]:
-    	n = x.shape[0]
+def truncate(x, d):
+    assert(ml.isVector(x))
+    D = x.shape[0]
 
-    r = []
-    for i in xrange(n):
-    	r.append(x[i])
-    return np.array(r)
+    if d >= D:
+    	d = D
+
+    ret = np.compress([True for _ in xrange(d)], x, axis=0)
+    assert(ret.shape == (d,))
+    return ret
+
+def truncate_batch(X, d):
+    assert(ml.dim(X) == 2)
+    N, D = X.shape
+
+    if d >= D:
+        d = D
+
+    ret = np.compress([True for _ in xrange(d)], X, axis=1)
+    assert(ret.shape == (N, d))
+
+
 
 def dct_truncate(X, n):
     one_d = np.reshape(X - 127, -1).astype(float)
