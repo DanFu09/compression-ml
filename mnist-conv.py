@@ -1,5 +1,9 @@
+from sklearn import preprocessing
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+import jpeg
+import numpy as np
+from sklearn import preprocessing
 
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1)
@@ -19,8 +23,11 @@ def max_pool_2x2(x):
 sess = tf.InteractiveSession()
 
 ## Model
-X = tf.placeholder(tf.float32, [None, 784])
-Y_ = tf.placeholder(tf.float32, [None, 10])
+# D = Input dimension, K = output dimension (# of classification categories)
+D, K = 28 * 28, 10
+
+X = tf.placeholder(tf.float32, [None, D])
+Y_ = tf.placeholder(tf.float32, [None, K])
 
 x_image = tf.reshape(X, [-1,28,28,1])
 
@@ -50,8 +57,8 @@ keep_prob = tf.placeholder(tf.float32)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 # Output layer
-W_fc2 = weight_variable([1024, 10])
-b_fc2 = bias_variable([10])
+W_fc2 = weight_variable([1024, K])
+b_fc2 = bias_variable([K])
 
 Y=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
@@ -65,13 +72,41 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 sess.run(tf.initialize_all_variables())
 
-# Train
-mutate = lambda x: x + 0.1
-mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-for i in xrange(1000):
-    if i % 100 == 0:
-        print accuracy.eval({X: mutate(mnist.test.images), Y_: mnist.test.labels, keep_prob: 1.0})
-    batch = mnist.train.next_batch(50)
-    opt.run(feed_dict={X: mutate(batch[0]), Y_: batch[1], keep_prob: 0.5})
+dct_truncate_D = lambda x: jpeg.dct_truncate(x, D)
 
-print accuracy.eval({X: mutate(mnist.test.images), Y_: mnist.test.labels, keep_prob: 1.0})
+# Train
+def mutate(X):
+    return X
+
+def mutate_data(X):
+    return X
+    return X + 1
+    X = np.apply_along_axis(jpeg.normal_to_bitmap, 1, X)
+    X = np.apply_along_axis(dct_truncate_D, 1, X)
+    return preprocessing.scale(X)
+
+mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+X_test = mutate_data(mnist.test.images)
+X_train = mutate_data(mnist.train.images)
+Y_test = mnist.test.labels
+Y_train = mnist.train.labels
+
+j = 0
+batch_size = 50
+def get_next_batch(X, Y):
+    global j
+    if (j + 1) * batch_size > X.shape[0]:
+        j = 0
+    make_batch = lambda x: x[j * batch_size : (j + 1) * batch_size, :]
+
+    j += 1
+    return make_batch(X), make_batch(Y)
+
+for i in xrange(1000):
+
+    batch = get_next_batch(X_train, Y_train)
+
+    if i % 50 == 0:
+        print Y.eval({X: X_test, Y_: Y_test, keep_prob: 1.0})
+        print accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0})
+    opt.run(feed_dict={X: batch[0], Y_: batch[1], keep_prob: 0.5})

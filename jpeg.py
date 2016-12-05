@@ -37,6 +37,11 @@ def truncate_batch(X, d):
     assert(ret.shape == (N, d))
 
 
+# Transforms a bit array with values between 0-1 to
+# one with values between 0-k
+def normal_to_bitmap(X, k=256): return np.rint(X * k)
+
+def bitmap_to_normal(X, k=256): return X / float(k)
 
 def dct_truncate(X, n):
     one_d = np.reshape(X - 127, -1).astype(float)
