@@ -57,10 +57,14 @@ def jpeg_decompress(Y, Q):
     return np.round(X + 127)
 
 X = np.array([[1, 2, 3, 0], [4, 5, 6, 7], [8 ,9, 10, 11]])
+X1 = np.array([[0, 0, 255, 0], [0, 256, 0, 0], [0 ,250, 0, 0]])
 
 Q = np.array([[2,2,2,2],[2,2,2,2],[2,2,2,2]])
 
 Xp = np.reshape(X, -1)
 
-print dct_truncate(Xp, 100)
-print dct_truncate(Xp, 5)
+print X
+print jpeg_compress(X, Q)
+
+print X1
+print jpeg_compress(X1, Q)

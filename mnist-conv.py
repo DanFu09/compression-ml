@@ -75,15 +75,24 @@ sess.run(tf.initialize_all_variables())
 dct_truncate_D = lambda x: jpeg.dct_truncate(x, D)
 
 # Train
+def sigmoid(t):
+    return 1. / (1. + np.exp(-t))
+
+
 def mutate(X):
     return X
 
 def mutate_data(X):
-    return X
-    return X + 1
+    # Input comes in as a normalized bitmap between 0 and 1.
+    # The below function just multiplies everything by 256
     X = np.apply_along_axis(jpeg.normal_to_bitmap, 1, X)
+
+    # Actually applies the DCT and truncates the vector
     X = np.apply_along_axis(dct_truncate_D, 1, X)
-    return preprocessing.scale(X)
+
+    # We have to squash the input between 0 and 1 to make the network converge
+    X = np.apply_along_axis(sigmoid, 1, X)
+    return X
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 X_test = mutate_data(mnist.test.images)
@@ -103,7 +112,6 @@ def get_next_batch(X, Y):
     return make_batch(X), make_batch(Y)
 
 for i in xrange(1000):
-
     batch = get_next_batch(X_train, Y_train)
 
     if i % 50 == 0:
