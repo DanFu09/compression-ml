@@ -8,7 +8,7 @@ import pdb
 
 import time
 # import cv2
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 
 sess = tf.InteractiveSession()
 
@@ -30,9 +30,9 @@ def bias_variable(shape):
 ## Model
 
 # D = Input dimension, K = output dimension (# of classification categories)
-D, K = 1024 * 3 , 10
+D, K = 1024 * 3 / 4, 10
 
-K1 = 1024 * 3 / 2
+K1 = 1024 / 2
 
 X = tf.placeholder(tf.float32, [None, D])
 Y_ = tf.placeholder(tf.float32, [None, K])
@@ -210,6 +210,7 @@ def get_next_batch(X, Y):
     j += 1
     return make_batch(X), make_batch(Y)
 
+start = time.time()
 for i in xrange(5000):
     batch = get_next_batch(X_train, Y_train)
 
@@ -219,3 +220,5 @@ for i in xrange(5000):
         #print 'Train: ', accuracy.eval({X: batch[0], Y_: batch[1], keep_prob: 1.0})
         print 'Test {}: {}'.format(i, accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0}))
     opt.run(feed_dict={X: batch[0], Y_: batch[1], keep_prob: 0.5})
+end = time.time()
+print 'Time = {}'.format(end - start)
