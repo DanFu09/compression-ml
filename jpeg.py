@@ -20,7 +20,7 @@ def truncate(x, d):
     D = x.shape[0]
 
     if d >= D:
-    	d = D
+    	return x
 
     ret = np.compress([True for _ in xrange(d)], x, axis=0)
     assert(ret.shape == (d,))
