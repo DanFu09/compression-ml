@@ -1,6 +1,8 @@
 from scipy import fftpack
 import numpy as np
 from ml_util import ml
+import math
+
 
 
 dct = lambda x, axis=1: fftpack.dct(x, type=2, axis=axis)
@@ -15,12 +17,38 @@ def jpeg_compress(X, Q):
 
     return quantized
 
+
+
+def get_square(X, (sx, sy), (ex, ey)): return X.reshape((32, 32))[sx:ex, sy:ey]
+
+def is_square(n):
+    s = int(math.sqrt(n))
+    return s * s == n
+
+
+# Returns d^2 elements from the top left corner of X
+def truncate_square(X, d):
+    D = X.shape[0]
+
+    # We only work on square matrices
+    assert is_square(D)
+    assert is_square(d)
+
+    if d >= D:
+        return X
+
+    Dp = int(math.sqrt(D))
+    dp = int(math.sqrt(d))
+    return X.reshape((Dp, Dp))[0:dp, 0:dp].reshape(-1)
+
+
+
 def truncate(x, d):
     assert(ml.isVector(x))
     D = x.shape[0]
 
     if d >= D:
-    	return x
+        return x
 
     ret = np.compress([True for _ in xrange(d)], x, axis=0)
     assert(ret.shape == (d,))
@@ -47,7 +75,7 @@ def bitmap_to_normal(X, k=256): return X / float(k)
 def dct_truncate(X, n, height, width):
     two_d = np.reshape(X, -1).astype(float).reshape((height, width)) - 127
     dcted = dct(dct(two_d, axis=0), axis=1)
-    return truncate(np.reshape(dcted, X.shape), n)
+    return truncate_square(np.reshape(dcted, X.shape), n)
 
 
 def jpeg_decompress(Y, Q):
@@ -56,6 +84,7 @@ def jpeg_decompress(Y, Q):
     dcted = Y * Q
     X = np.reshape(idct(np.reshape(dcted, -1)), Y.shape)
     return np.round(X + 127)
+
 
 
 # X = np.array([[1, 2, 3, 0], [4, 5, 6, 7], [8 ,9, 10, 11]])

@@ -174,7 +174,6 @@ def pca_data(X):
     pca = PCA(n_components = D)
     return pca.fit_transform(scaled)
 
-def get_square(X, (sx, sy), (ex, ey)): return X.reshape((32, 32))[sx:ex, sy:ey]
 
 # ycrcb(X_train[0])
 # ycrcb(X_train[1])
