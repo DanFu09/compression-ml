@@ -3,8 +3,8 @@ import numpy as np
 from ml_util import ml
 
 
-dct = lambda x: fftpack.dct(x, norm='ortho')
-idct = lambda x: fftpack.idct(x, norm='ortho')
+dct = lambda x, axis=1: fftpack.dct(x, type=2, axis=axis)
+idct = lambda x, axis=1: fftpack.idct(x, type=2, axis=axis)
 
 def jpeg_compress(X, Q):
     assert(X.shape == Q.shape)
@@ -43,10 +43,11 @@ def normal_to_bitmap(X, k=256): return np.rint(X * k)
 
 def bitmap_to_normal(X, k=256): return X / float(k)
 
-def dct_truncate(X, n):
-    one_d = np.reshape(X - 127, -1).astype(float)
-    dcted = np.reshape(dct(one_d), X.shape)
-    return truncate(dcted, n)
+# Runs DCT on a two-dimensional image
+def dct_truncate(X, n, height, width):
+    two_d = np.reshape(X, -1).astype(float).reshape((height, width)) - 127
+    dcted = dct(dct(two_d, axis=0), axis=1)
+    return truncate(np.reshape(dcted, X.shape), n)
 
 
 def jpeg_decompress(Y, Q):
@@ -56,15 +57,16 @@ def jpeg_decompress(Y, Q):
     X = np.reshape(idct(np.reshape(dcted, -1)), Y.shape)
     return np.round(X + 127)
 
-X = np.array([[1, 2, 3, 0], [4, 5, 6, 7], [8 ,9, 10, 11]])
-X1 = np.array([[0, 0, 255, 0], [0, 256, 0, 0], [0 ,250, 0, 0]])
 
-Q = np.array([[2,2,2,2],[2,2,2,2],[2,2,2,2]])
+# X = np.array([[1, 2, 3, 0], [4, 5, 6, 7], [8 ,9, 10, 11]])
+# X1 = np.array([[0, 0, 255, 0], [0, 256, 0, 0], [0 ,250, 0, 0]])
 
-Xp = np.reshape(X, -1)
+# Q = np.array([[2,2,2,2],[2,2,2,2],[2,2,2,2]])
 
-print X
-print jpeg_compress(X, Q)
+# Xp = np.reshape(X, -1)
 
-print X1
-print jpeg_compress(X1, Q)
+# print X
+# print jpeg_compress(X, Q)
+
+# print X1
+# print jpeg_compress(X1, Q)

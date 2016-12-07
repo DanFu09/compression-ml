@@ -7,7 +7,7 @@ from ml_util import ml
 import pdb
 
 import time
-import cv2
+# import cv2
 from matplotlib import pyplot as plt
 
 sess = tf.InteractiveSession()
@@ -30,7 +30,7 @@ def bias_variable(shape):
 ## Model
 
 # D = Input dimension, K = output dimension (# of classification categories)
-D, K = 1024 , 10
+D, K = 1024 * 3 , 10
 
 K1 = 1024 * 3 / 2
 
@@ -95,7 +95,7 @@ def ycrcb(x):
 
     plt.imshow(a)
     return a
-    return cv2.cvtColor(a, cv2.cv.CV_BGR2YCrCb)
+    # return cv2.cvtColor(a, cv2.cv.CV_BGR2YCrCb)
 
 
 meta = unpickle('cifar/batches.meta')['label_names']
@@ -118,16 +118,51 @@ def mutate(X):
     return X
 
 # All of the below should return vectors with elements between [0, 0.1]
-dct_truncate_D = lambda x: jpeg.dct_truncate(x, D)
+dct_truncate_D = lambda x: jpeg.dct_truncate(x, D, 32, 32)
+dct_truncate_D_split = lambda x: jpeg.dct_truncate(x, D / 3, 32, 32)
 def dct_data(X):
     # Actually applies the DCT and truncates the vector
-    X = np.apply_along_axis(dct_truncate_D, 1, X)
+
+    # Code for DCT'ing three color channels separately
+    X1 = X[:, :1024]
+    X2 = X[:, 1024:2048]
+    X3 = X[:, 2048:3072]
+
+    X1 = np.apply_along_axis(dct_truncate_D_split, 1, X1)
+    X2 = np.apply_along_axis(dct_truncate_D_split, 1, X2)
+    X3 = np.apply_along_axis(dct_truncate_D_split, 1, X3)
 
     #X = minmax_scale(X)
-    return X
-    # We have to squash the input between -0.5 and 0.5 to make the network converge
-    X = np.apply_along_axis(sigmoid, 1, X) - 0.5
-    return X / 10.
+    # return X
+    # We have to squash the input between 0 and 1 to make the network converge
+    X1 = np.apply_along_axis(minmax_scale, 1, X1)
+    X2 = np.apply_along_axis(minmax_scale, 1, X2)
+    X3 = np.apply_along_axis(minmax_scale, 1, X3)
+
+    # Code to print out 0's and 1's
+    # Xs = [X1, X2, X3]
+    # for bigX in Xs:
+    #     for i in xrange(32):
+    #         out = ""
+    #         for j in xrange(32):
+    #             if abs(bigX[0][i * 32 + j]) < 0.01:
+    #                 out += "0"
+    #             else:
+    #                 out += "1"
+    #             out += ","
+    #         print out
+
+    # Recombine into one array
+    X = [] 
+    for i in xrange(len(X1)):
+        append = []
+        append.extend(X1[i])
+        append.extend(X2[i])
+        append.extend(X3[i])
+        X.append(append)
+    X = np.matrix(X) / 10.
+
+    return np.matrix(X) / 10.
 
 truncate_D = lambda x: jpeg.truncate(x, D)
 def squash_data(X):
@@ -141,12 +176,12 @@ def pca_data(X):
 
 def get_square(X, (sx, sy), (ex, ey)): return X.reshape((32, 32))[sx:ex, sy:ey]
 
-ycrcb(X_train[0])
-ycrcb(X_train[1])
-plt.show()
-time.sleep(100)
-exit()
-np.apply_along_axis(ycrcb, 1, X_train)
+# ycrcb(X_train[0])
+# ycrcb(X_train[1])
+# plt.show()
+# time.sleep(100)
+# exit()
+# np.apply_along_axis(ycrcb, 1, X_train)
 
 
 mutate_data = dct_data
@@ -155,7 +190,9 @@ X_test = mutate_data(X_test)
 X_train = mutate_data(X_train)
 
 print 'Done mutating data. X_train.shape == {}'.format(X_train.shape)
-pdb.set_trace()
+# pdb.set_trace()
+
+print X_test.shape, N_test, D
 
 assert(X_test.shape == (N_test, D))
 assert(Y_test.shape == (N_test, K))
