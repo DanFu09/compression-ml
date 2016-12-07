@@ -39,6 +39,11 @@ def truncate_square(X, d):
 
     Dp = int(math.sqrt(D))
     dp = int(math.sqrt(d))
+
+    # Gets the lower right square of X. If you uncomment the next line,
+    # the algorithm doesn't get past random accuracy, showing that
+    # the bottom right features are indeed not useful
+    #return X.reshape((Dp, Dp))[-dp:, -dp:].reshape(-1)
     return X.reshape((Dp, Dp))[0:dp, 0:dp].reshape(-1)
 
 
