@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 import jpeg
 import numpy as np
+import time
 
 sess = tf.InteractiveSession()
 
@@ -16,9 +17,9 @@ def bias_variable(shape):
 ## Model
 
 # D = Input dimension, K = output dimension (# of classification categories)
-D, K = 784, 10
+D, K = 784 , 10
 
-K1 = 1024
+K1 = 512
 
 X = tf.placeholder(tf.float32, [None, D])
 Y_ = tf.placeholder(tf.float32, [None, K])
@@ -51,21 +52,26 @@ sess.run(tf.initialize_all_variables())
 def sigmoid(t):
     return 1. / (1. + np.exp(-t))
 
+def minmax_scale(X):
+    return X / (np.max(X) - np.min(X))
+
 def mutate(X):
     return X
 
-dct_truncate_D = lambda x: jpeg.dct_truncate(x, D)
+dct_truncate_D = lambda x: jpeg.dct_truncate(x, D, 28, 28)
 def mutate_data(X):
     # Input comes in as a normalized bitmap between 0 and 1.
     # The below function just multiplies everything by 256
+    return X
+
     X = np.apply_along_axis(jpeg.normal_to_bitmap, 1, X)
 
     # Actually applies the DCT and truncates the vector
     X = np.apply_along_axis(dct_truncate_D, 1, X)
 
     # We have to squash the input between 0 and 1 to make the network converge
-    X = np.apply_along_axis(sigmoid, 1, X)
-    import pdb; pdb.set_trace()
+    X = np.apply_along_axis(minmax_scale, 1, X)
+    # import pdb; pdb.set_trace()
     return X
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
@@ -85,7 +91,8 @@ def get_next_batch(X, Y):
     j += 1
     return make_batch(X), make_batch(Y)
 
-for i in xrange(5000):
+start = time.time()
+for i in xrange(20000):
     batch = get_next_batch(X_train, Y_train)
 
     if i % 100 == 0:
@@ -94,3 +101,5 @@ for i in xrange(5000):
         #print 'Train: ', accuracy.eval({X: batch[0], Y_: batch[1], keep_prob: 1.0})
         print 'Test {}: {}'.format(i, accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0}))
     opt.run(feed_dict={X: batch[0], Y_: batch[1], keep_prob: 0.5})
+end = time.time()
+print 'Time = {}'.format(end - start)
