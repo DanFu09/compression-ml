@@ -4,6 +4,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 import jpeg
 import numpy as np
 import time
+from sklearn.decomposition import PCA
 
 sess = tf.InteractiveSession()
 
@@ -28,7 +29,7 @@ Y_ = tf.placeholder(tf.float32, [None, K])
 W0 = weight_variable([D, K1])
 b0 = bias_variable([K1])
 
-h_fc1 = tf.matmul(X, W0) + b0
+h_fc1 = tf.nn.relu(tf.matmul(X, W0) + b0)
 
 W1 = weight_variable([K1, K])
 b1 = bias_variable([K])
@@ -60,7 +61,7 @@ def mutate(X):
     return X
 
 dct_truncate_D = lambda x: jpeg.dct_truncate(x, D, 28, 28)
-def mutate_data(X):
+def dct_data(X):
     # Input comes in as a normalized bitmap between 0 and 1.
     # The below function just multiplies everything by 256
     return X
@@ -74,11 +75,20 @@ def mutate_data(X):
     X = np.apply_along_axis(minmax_scale, 1, X)
     return X
 
+def pca_data(X):
+    scaled = jpeg.bitmap_to_normal(X, 256)
+    pca = PCA(n_components = D)
+    return pca.fit_transform(scaled)
+
+mutate_data = dct_data
+
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 X_test = mutate_data(mnist.test.images)
 X_train = mutate_data(mnist.train.images)
 Y_test = mnist.test.labels
 Y_train = mnist.train.labels
+
+print 'Training with shape {}'.format(X_train.shape)
 
 j = 0
 batch_size = 50

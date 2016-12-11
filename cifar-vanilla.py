@@ -30,7 +30,7 @@ def bias_variable(shape):
 ## Model
 
 # D = Input dimension, K = output dimension (# of classification categories)
-D, K = 768, 10
+D, K = 192, 10
 
 K1 = 512
 
@@ -40,7 +40,7 @@ Y_ = tf.placeholder(tf.float32, [None, K])
 W0 = weight_variable([D, K1])
 b0 = bias_variable([K1])
 
-h_fc1 = tf.matmul(X, W0) + b0
+h_fc1 = tf.nn.relu(tf.matmul(X, W0) + b0)
 
 W1 = weight_variable([K1, K])
 b1 = bias_variable([K])
