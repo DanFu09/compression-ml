@@ -25,7 +25,7 @@ sess = tf.InteractiveSession()
 
 ## Model
 # D = Input dimension, K = output dimension (# of classification categories)
-S = 28
+S = 16
 D, K = S * S, 10
 
 X = tf.placeholder(tf.float32, [None, D])
@@ -48,10 +48,10 @@ h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
 h_pool2 = max_pool_2x2(h_conv2)
 
 # Fully connected layer
-W_fc1 = weight_variable([7 * 7 * 64, 1024])
+W_fc1 = weight_variable([(S/4) * (S/4) * 64, 1024])
 b_fc1 = bias_variable([1024])
 
-h_pool2_flat = tf.reshape(h_pool2, [-1, 7*7*64])
+h_pool2_flat = tf.reshape(h_pool2, [-1, (S/4)*(S/4)*64])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
 # Dropout to prevent overfitting
@@ -133,5 +133,8 @@ for i in xrange(20000):
         print 'Train: ', accuracy.eval({X: batch[0], Y_: batch[1], keep_prob: 1.0})
         print 'Test {}: {}'.format(i, accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0}))
     opt.run(feed_dict={X: batch[0], Y_: batch[1], keep_prob: 0.5})
+
+print 'Train: ', accuracy.eval({X: batch[0], Y_: batch[1], keep_prob: 1.0})
+print 'Test {}: {}'.format(i, accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0}))
 end = time.time()
 print 'Time = {}'.format(end - start)

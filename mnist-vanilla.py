@@ -64,7 +64,6 @@ dct_truncate_D = lambda x: jpeg.dct_truncate(x, D, 28, 28)
 def dct_data(X):
     # Input comes in as a normalized bitmap between 0 and 1.
     # The below function just multiplies everything by 256
-    return X
 
     X = np.apply_along_axis(jpeg.normal_to_bitmap, 1, X)
 
@@ -80,7 +79,9 @@ def pca_data(X):
     pca = PCA(n_components = D)
     return pca.fit_transform(scaled)
 
-mutate_data = dct_data
+def id(X): return X
+
+mutate_data = id
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 X_test = mutate_data(mnist.test.images)
@@ -105,11 +106,14 @@ start = time.time()
 for i in xrange(20000):
     batch = get_next_batch(X_train, Y_train)
 
-    if i % 500 == 0:
+    if i % 100 == 0:
         w0 = sess.run(W0, {X: X_test, Y_: Y_test, keep_prob: 1.0})
         y = Y.eval({X: X_test, Y_: Y_test, keep_prob: 1.0})
         print 'Train: ', accuracy.eval({X: batch[0], Y_: batch[1], keep_prob: 1.0})
         print 'Test {}: {}'.format(i, accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0}))
     opt.run(feed_dict={X: batch[0], Y_: batch[1], keep_prob: 0.5})
+
+print 'Train: ', accuracy.eval({X: batch[0], Y_: batch[1], keep_prob: 1.0})
+print 'Test {}: {}'.format(i, accuracy.eval({X: X_test, Y_: Y_test, keep_prob: 1.0}))
 end = time.time()
 print 'Time = {}'.format(end - start)
